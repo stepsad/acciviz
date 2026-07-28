@@ -203,13 +203,11 @@ with st.expander("À propos"):
         '''
         **AcciViz** est un tableau de bord permettant de visualier l'accidentalité d'un département pour une année sélectionnée.
 
-        Contact : Stéphane SADOWSKI - [Cerema Est](https://www.cerema.fr/fr/cerema/directions/cerema-est) - stephane.sadowski@cerema.fr
-
         ### Source des données
-
-        Les données accidents proviennent toutes du site Web [datagouv](https://www.data.gouv.fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2024).
+        
+        Les données accidents proviennent toutes du site Web [datagouv.fr](https://www.data.gouv.fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2024).
         Elles sont sous licence ouverte (Open licence).
-
+        
         Pour l'exploitation du jeu de données, il est vivement recommandé de télécharger la description des bases de données annuelles.
         '''
     )
@@ -225,6 +223,23 @@ with st.expander("À propos"):
         icon=":material/download:"
     )
 
+    st.markdown(
+        '''
+        ### Contact
+                
+        Stéphane SADOWSKI  
+        Chargé d'études en sécurité routière  
+        Cerema Est - Bâtiment C Île du Saulcy - 57000 Metz  
+        :material/contact_mail: [stephane.sadowski@cerema.fr](mailto:stephane.sadowski@cerema.fr)  
+        :material/phone: 07 64 42 87 61
+        '''
+    )
+
+    c1, c2, c3 = st.columns([0.4, 0.4, 0.2])
+    c1.image("assets/logo_cerema_horizontal_resized.png", link="https://www.cerema.fr/fr")
+    c2.image("assets/onisr.png", link="https://www.onisr.securite-routiere.gouv.fr/")
+    c3.image("assets/securite_ensemble.png", link="https://www.securite-routiere.gouv.fr/")
+
 st.divider()
 
 year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020), index=0)
@@ -239,17 +254,52 @@ df_indicateur = calculer_indicateurs(df_accident)
 
 st.subheader(f"Accidentologie pour l'année {year} dans le département {dept}")
 
-c1, c2, c3, c4 = st.columns(4, border=True)
-c1.metric("Nombre d'accidents (A)", value=df_indicateur["Num_Acc"].nunique())
-c2.metric("Nombre d'accidents mortels (AM)", value=df_indicateur["AM"].sum())
-c3.metric("Nombre d'accidents graves non mortel (AGNM)", value=df_indicateur["AGNM"].sum())
-c4.metric("Nombre d'accidents légers (AL)", value=df_indicateur["AL"].sum())
+c1, c2, c3, c4 = st.columns(4)
+c1.metric(
+    "Nombre d'accidents (A)", 
+    value=df_indicateur["Num_Acc"].nunique(), 
+    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / 1051309)} en Mhab', 
+    delta_arrow="off", 
+    delta_color="off", 
+    border=True
+)
+c2.metric(
+    "Nombre d'accidents mortels (AM)", 
+    value=df_indicateur["AM"].sum(), 
+    border=True
+)
+c3.metric(
+    "Nombre d'accidents graves non mortel (AGNM)", 
+    value=df_indicateur["AGNM"].sum(), 
+    border=True
+)
+c4.metric(
+    "Nombre d'accidents légers (AL)", 
+    value=df_indicateur["AL"].sum(), 
+    border=True
+)
 
-c5, c6, c7, c8 = st.columns(4, border=True)
-c5.metric("Nombre de victimes (V)", value=df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum())
-c6.metric("Nombre de tués (T)", value=df_indicateur["T"].astype(int).sum())
-c7.metric("Nombre de blessés (B)", value=df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum())
-c8.metric("Nombre de blessés hospitalisés (H)", value=df_indicateur["BH"].astype(int).sum())
+c5, c6, c7, c8 = st.columns(4)
+c5.metric(
+    "Nombre de victimes (V)", 
+    value=df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(), 
+    border=True
+)
+c6.metric(
+    "Nombre de tués (T)", 
+    value=df_indicateur["T"].astype(int).sum(), 
+    border=True
+)
+c7.metric(
+    "Nombre de blessés (B)", 
+    value=df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(), 
+    border=True
+)
+c8.metric(
+    "Nombre de blessés hospitalisés (H)", 
+    value=df_indicateur["BH"].astype(int).sum(), 
+    border=True
+)
 
 # Conserver uniquement les victimes, écarter les "Indemnes".
 df_victimes = df_accident[(df_accident["grav"] == 2) | (df_accident["grav"] == 3) | (df_accident["grav"] == 4)].reset_index()
