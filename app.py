@@ -2,9 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from pathlib import Path
 
-ASSETS_PATH = Path(__file__).parent / "assets"
 
 # =============================================================
 # FONCTIONS
@@ -12,14 +10,14 @@ ASSETS_PATH = Path(__file__).parent / "assets"
 
 @st.cache_data
 def load_data(year=2024, dept='57 Moselle'):
-    """_summary_
+    """Charger les 4 fichiers suivants : caractéristiques, lieux, véhicules, usagers. Puis les fusionner dans un unique jeu de donnée 'df_accident'.
 
     Args:
-        year (int, optional): _description_. Defaults to 2024.
-        dept (str, optional): _description_. Defaults to '57 Moselle'.
+        year (int, optionel): l'année issue du filtre 'Année'. Par défaut 2024.
+        dept (str, optionel): le département issu du filtre 'Département'. Par défaut '57 Moselle'.
 
     Returns:
-        _type_: _description_
+        Any: le jeu de données 'df_accident'.
     """
     df_caracteristique = pd.read_csv(f"data/caracteristiques-{year}.csv", sep=";")
     df_lieu = pd.read_csv(f"data/lieux-{year}.csv", sep=";", low_memory=False)
@@ -39,13 +37,13 @@ def load_data(year=2024, dept='57 Moselle'):
     return df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager
 
 def prepare_data(df_accident):
-    """_summary_
+    """Préparer le jeu de données 'df_accident' pour la génération du tableau de bord.
 
     Args:
-        df_accident (_type_): _description_
+        df_accident (Any): jeu de données 'df_accident' avant préparation
 
     Returns:
-        _type_: _description_
+        Any: le jeu de données 'df_accident' préparé.
     """
     # Caster les colonnes 'lat' et 'long' en entier
     df_accident['lat'] = df_accident['lat'].str.replace(',', '.')
