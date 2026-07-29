@@ -2,10 +2,25 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
+ASSETS_PATH = Path(__file__).parent / "assets"
+
+# =============================================================
+# FONCTIONS
+# =============================================================
 
 @st.cache_data
 def load_data(year=2024, dept='57 Moselle'):
+    """_summary_
+
+    Args:
+        year (int, optional): _description_. Defaults to 2024.
+        dept (str, optional): _description_. Defaults to '57 Moselle'.
+
+    Returns:
+        _type_: _description_
+    """
     df_caracteristique = pd.read_csv(f"data/caracteristiques-{year}.csv", sep=";")
     df_lieu = pd.read_csv(f"data/lieux-{year}.csv", sep=";", low_memory=False)
     df_vehicule = pd.read_csv(f"data/vehicules-{year}.csv", sep=";")
@@ -23,7 +38,15 @@ def load_data(year=2024, dept='57 Moselle'):
 
     return df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager
 
-def preparer_df(df_accident):
+def prepare_data(df_accident):
+    """_summary_
+
+    Args:
+        df_accident (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # Caster les colonnes 'lat' et 'long' en entier
     df_accident['lat'] = df_accident['lat'].str.replace(',', '.')
     df_accident['long'] = df_accident['long'].str.replace(',', '.')
@@ -106,7 +129,15 @@ def preparer_df(df_accident):
 
     return df_accident
 
-def calculer_indicateurs(df):
+def calculate_indicators(df):
+    """_summary_
+
+    Args:
+        df (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     df_grav_1 = (df.loc[df["grav"] == 1, ["Num_Acc", "grav"]]
                    .rename(columns={"grav":"I"})
                    .groupby(by="Num_Acc")
@@ -145,50 +176,351 @@ def calculer_indicateurs(df):
 
     return df_grav
 
-def lister_departement():
+def list_dept():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     # Métropole (01–95, + 2A, 2B pour la Corse)
     metro = [
-        "01 Ain", "02 Aisne", "03 Allier", "04 Alpes-de-Haute-Provence",
-        "05 Hautes-Alpes", "06 Alpes-Maritimes", "07 Ardèche", "08 Ardennes",
-        "09 Ariège", "10 Aube", "11 Aude", "12 Aveyron", "13 Bouches-du-Rhône",
-        "14 Calvados", "15 Cantal", "16 Charente", "17 Charente-Maritime",
-        "18 Cher", "19 Corrèze", "21 Côte-d'Or", "22 Côtes-d'Armor",
-        "23 Creuse", "24 Dordogne", "25 Doubs", "26 Drôme", "27 Eure",
-        "28 Eure-et-Loir", "29 Finistère", "2A Corse-du-Sud", "2B Haute-Corse",
-        "30 Gard", "31 Haute-Garonne", "32 Gers", "33 Gironde", "34 Hérault",
-        "35 Ille-et-Vilaine", "36 Indre", "37 Indre-et-Loire", "38 Isère",
-        "39 Jura", "40 Landes", "41 Loir-et-Cher", "42 Loire", "43 Haute-Loire",
-        "44 Loire-Atlantique", "45 Loiret", "46 Lot", "47 Lot-et-Garonne",
-        "48 Lozère", "49 Maine-et-Loire", "50 Manche", "51 Marne", "52 Haute-Marne",
-        "53 Mayenne", "54 Meurthe-et-Moselle", "55 Meuse", "56 Morbihan",
-        "57 Moselle", "58 Nièvre", "59 Nord", "60 Oise", "61 Orne", "62 Pas-de-Calais",
-        "63 Puy-de-Dôme", "64 Pyrénées-Atlantiques", "65 Hautes-Pyrénées",
-        "66 Pyrénées-Orientales", "67 Bas-Rhin", "68 Haut-Rhin", "69 Rhône",
-        "70 Haute-Saône", "71 Saône-et-Loire", "72 Sarthe", "73 Savoie",
-        "74 Haute-Savoie", "75 Paris", "76 Seine-Maritime", "77 Seine-et-Marne",
-        "78 Yvelines", "79 Deux-Sèvres", "80 Somme", "81 Tarn", "82 Tarn-et-Garonne",
-        "83 Var", "84 Vaucluse", "85 Vendée", "86 Vienne", "87 Haute-Vienne",
-        "88 Vosges", "89 Yonne", "90 Territoire-de-Belfort", "91 Essonne",
-        "92 Hauts-de-Seine", "93 Seine-Saint-Denis", "94 Val-de-Marne", "95 Val-d'Oise",
+        ('01', 'Ain', '01 Ain', 694945),
+        ('02', 'Aisne', '02 Aisne', 534380),
+        ('03', 'Allier', '03 Allier', 341713),
+        ('04', 'Alpes-de-Haute-Provence', '04 Alpes-de-Haute-Provence', 172385),
+        ('05', 'Hautes-Alpes', '05 Hautes-Alpes', 147756),
+        ('06', 'Alpes-Maritimes', '06 Alpes-Maritimes', 1142503),
+        ('07', 'Ardèche', '07 Ardèche', 342599),
+        ('08', 'Ardennes', '08 Ardennes', 271604),
+        ('09', 'Ariège', '09 Ariège', 159684),
+        ('10', 'Aube', '10 Aube', 317296),
+        ('11', 'Aude', '11 Aude', 387874),
+        ('12', 'Aveyron', '12 Aveyron', 289413),
+        ('13', 'Bouches-du-Rhône', '13 Bouches-du-Rhône', 2112170),
+        ('14', 'Calvados', '14 Calvados', 722979),
+        ('15', 'Cantal', '15 Cantal', 148813),
+        ('16', 'Charente', '16 Charente', 361286),
+        ('17', 'Charente-Maritime', '17 Charente-Maritime', 688067),
+        ('18', 'Cher', '18 Cher', 305233),
+        ('19', 'Corrèze', '19 Corrèze', 248289),
+        ('21', 'Côte-d''Or', '21 Côte-d''Or', 551336),
+        ('22', 'Côtes-d''Armor', '22 Côtes-d''Armor', 629517),
+        ('23', 'Creuse', '23 Creuse', 118760),
+        ('24', 'Dordogne', '24 Dordogne', 427558),
+        ('25', 'Doubs', '25 Doubs', 560477),
+        ('26', 'Drôme', '26 Drôme', 536948),
+        ('27', 'Eure', '27 Eure', 616217),
+        ('28', 'Eure-et-Loir', '28 Eure-et-Loir', 443227),
+        ('29', 'Finistère', '29 Finistère', 957671),
+        ('2A', 'Corse-du-Sud', '2A Corse-du-Sud', 170548),
+        ('2B', 'Haute-Corse', '2B Haute-Corse', 189722),
+        ('30', 'Gard', '30 Gard', 784471),
+        ('31', 'Haute-Garonne', '31 Haute-Garonne', 1494734),
+        ('32', 'Gers', '32 Gers', 198955),
+        ('33', 'Gironde', '33 Gironde', 1716986),
+        ('34', 'Hérault', '34 Hérault', 1248501),
+        ('35', 'Ille-et-Vilaine', '35 Ille-et-Vilaine', 1145286),
+        ('36', 'Indre', '36 Indre', 221574),
+        ('37', 'Indre-et-Loire', '37 Indre-et-Loire', 631334),
+        ('38', 'Isère', '38 Isère', 1324225),
+        ('39', 'Jura', '39 Jura', 266940),
+        ('40', 'Landes', '40 Landes', 445828),
+        ('41', 'Loir-et-Cher', '41 Loir-et-Cher', 337089),
+        ('42', 'Loire', '42 Loire', 788024),
+        ('43', 'Haute-Loire', '43 Haute-Loire', 235575),
+        ('44', 'Loire-Atlantique', '44 Loire-Atlantique', 1517043),
+        ('45', 'Loiret', '45 Loiret', 705712),
+        ('46', 'Lot', '46 Lot', 181747),
+        ('47', 'Lot-et-Garonne', '47 Lot-et-Garonne', 341487),
+        ('48', 'Lozère', '48 Lozère', 79964),
+        ('49', 'Maine-et-Loire', '49 Maine-et-Loire', 853768),
+        ('50', 'Manche', '50 Manche', 512167),
+        ('51', 'Marne', '51 Marne', 574142),
+        ('52', 'Haute-Marne', '52 Haute-Marne', 172981),
+        ('53', 'Mayenne', '53 Mayenne', 314446),
+        ('54', 'Meurthe-et-Moselle', '54 Meurthe-et-Moselle', 743353),
+        ('55', 'Meuse', '55 Meuse', 185178),
+        ('56', 'Morbihan', '56 Morbihan', 804597),
+        ('57', 'Moselle', '57 Moselle', 1068899),
+        ('58', 'Nièvre', '58 Nièvre', 206356),
+        ('59', 'Nord', '59 Nord', 2645946),
+        ('60', 'Oise', '60 Oise', 846757),
+        ('61', 'Orne', '61 Orne', 282417),
+        ('62', 'Pas-de-Calais', '62 Pas-de-Calais', 1479365),
+        ('63', 'Puy-de-Dôme', '63 Puy-de-Dôme', 678624),
+        ('64', 'Pyrénées-Atlantiques', '64 Pyrénées-Atlantiques', 725655),
+        ('65', 'Hautes-Pyrénées', '65 Hautes-Pyrénées', 237032),
+        ('66', 'Pyrénées-Orientales', '66 Pyrénées-Orientales', 504938),
+        ('67', 'Bas-Rhin', '67 Bas-Rhin', 1178940),
+        ('68', 'Haut-Rhin', '68 Haut-Rhin', 784356),
+        ('69', 'Rhône', '69 Rhône', 1940015),
+        ('70', 'Haute-Saône', '70 Haute-Saône', 239102),
+        ('71', 'Saône-et-Loire', '71 Saône-et-Loire', 564938),
+        ('72', 'Sarthe', '72 Sarthe', 579227),
+        ('73', 'Savoie', '73 Savoie', 460217),
+        ('74', 'Haute-Savoie', '74 Haute-Savoie', 881729),
+        ('75', 'Paris', '75 Paris', 2119412),
+        ('76', 'Seine-Maritime', '76 Seine-Maritime', 1281667),
+        ('77', 'Seine-et-Marne', '77 Seine-et-Marne', 1484180),
+        ('78', 'Yvelines', '78 Yvelines', 1508510),
+        ('79', 'Deux-Sèvres', '79 Deux-Sèvres', 385771),
+        ('80', 'Somme', '80 Somme', 575371),
+        ('81', 'Tarn', '81 Tarn', 407233),
+        ('82', 'Tarn-et-Garonne', '82 Tarn-et-Garonne', 271650),
+        ('83', 'Var', '83 Var', 1135585),
+        ('84', 'Vaucluse', '84 Vaucluse', 582656),
+        ('85', 'Vendée', '85 Vendée', 732903),
+        ('86', 'Vienne', '86 Vienne', 449082),
+        ('87', 'Haute-Vienne', '87 Haute-Vienne', 379464),
+        ('88', 'Vosges', '88 Vosges', 367295),
+        ('89', 'Yonne', '89 Yonne', 340359),
+        ('90', 'Territoire de Belfort', '90 Territoire de Belfort', 143144),
+        ('91', 'Essonne', '91 Essonne', 1351891),
+        ('92', 'Hauts-de-Seine', '92 Hauts-de-Seine', 1670575),
+        ('93', 'Seine-Saint-Denis', '93 Seine-Saint-Denis', 1710659),
+        ('94', 'Val-de-Marne', '94 Val-de-Marne', 1435612),
+        ('95', 'Val-d''Oise', '95 Val-d''Oise', 1290942),
     ]
 
     # DOM-TOM (DROM + COM principaux)
     domtom = [
-        "971 Guadeloupe",
-        "972 Martinique",
-        "973 Guyane",
-        "974 La Réunion",
-        "976 Mayotte",
-        "975 Saint-Pierre-et-Miquelon",
-        "977 Saint-Barthélemy",
-        "978 Saint-Martin",
-        "986 Wallis-et-Futuna",
-        "987 Polynésie française",
-        "988 Nouvelle-Calédonie",
+        ('971', 'Guadeloupe', '971 Guadeloupe', 388493),
+        ('972', 'Martinique', '972 Martinique', 364348),
+        ('973', 'Guyane', '973 Guyane', 296053),
+        ('974', 'La Réunion', '974 La Réunion', 899660),
+        ('976', 'Mayotte', '975 Mayotte', 256518),
+        ('975', 'Saint-Pierre-et-Miquelon', '976 Saint-Pierre-et-Miquelon', None),
+        ('977', 'Saint-Barthélemy', '977 Saint-Barthélemy', None),
+        ('978', 'Saint-Martin', '978 Saint-Martin', None),
+        ('986', 'Wallis-et-Futuna', '986 Wallis-et-Futuna', None),
+        ('987', 'Polynésie française', '987 Polynésie française', None),
+        ('988', 'Nouvelle-Calédonie', '988 Nouvelle-Calédonie', None),
     ]
 
     return metro + domtom    
 
+def get_info_dept(nom_recherche):
+    """Retourne le tuple (code, nom, pop) dont le nom correspond exactement.
+    Retourne None si aucun département ne correspond.
+
+    Args:
+        nom_recherche (str): Le nom complet du département (code_insee + libellé)
+
+    Returns:
+        tuple: le tuple trouvé (code_insee, nom, nom_complet, pop)
+    """
+    for code, nom, nom_complet, pop in list_dept():
+        if nom_complet == nom_recherche:
+            return (code, nom, nom_complet, pop)
+    return None
+
+def generate_graph(df_vic):
+    # agg-graph ----------------------------------
+    df_vic = df_vic.assign(agg_2 = 'Hors agglomération')
+    df_vic.loc[df_vic['agg'] == 2, 'agg_2'] = 'En agglomération'
+    df_vicGroupBy = df_vic.groupby('agg_2').count()
+    fig1 = px.pie(
+        df_vicGroupBy, 
+        values="Num_Acc", 
+        names=df_vicGroupBy.index,
+        labels={
+            "Num_Acc": "Victimes",
+            "agg_2": "Localisation"
+        }, 
+        title="Part des victimes par localisation",
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # int-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('int_2').count()
+    fig2 = px.pie(
+        df_vicGroupBy, 
+        values="Num_Acc", 
+        names=df_vicGroupBy.index,
+        labels={
+            "Num_Acc": "Victimes",
+            "int_2": "Intersection"
+        }, 
+        title="Part des victimes par intersection",
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # lum-graph -----------------------------
+    df_vicGroupBy = df_vic.groupby('lum_2').count()
+    fig3 = px.pie(
+        df_vicGroupBy, 
+        values="Num_Acc", 
+        names=df_vicGroupBy.index,
+        labels={
+            "Num_Acc": "Victimes",
+            "lum_2": "Luminosité"
+        }, 
+        title="Part des victimes par luminosité",
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # catr-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('catr_2').count()
+    fig4 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "catr_2": "Cat. route"
+        },
+        title="Victimes par catégorie de route",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # atm-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('atm_2').count()
+    fig5 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "atm_2": "Cond. atmosphériques"
+        },
+        title="Victimes par conditions atmosphériques",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # surf-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('surf_2').count()
+    fig6 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "surf_2": "Etat surface"
+        },
+        title="Victimes selon l'état de surface de la chaussée",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # catu-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('catu').count()
+    df_vicGroupBy.rename(index={1: 'Conducteur', 2: 'Passager', 3: 'Piéton'}, inplace=True)
+    fig7 = px.pie(
+        df_vicGroupBy, 
+        values="Num_Acc", 
+        names=df_vicGroupBy.index,
+        labels={
+            "Num_Acc": "Victimes",
+            "catu": "Cat. usager"
+        }, 
+        title="Part des victimes par catégorie d'usager",
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # sexe-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('sexe').count()
+    df_vicGroupBy.rename(index={1: 'Masculin', 2: 'Féminin'}, inplace=True)
+    fig8 = px.pie(
+        df_vicGroupBy, 
+        values="Num_Acc", 
+        names=df_vicGroupBy.index,
+        labels={
+            "Num_Acc": "Victimes",
+            "sexe": "Sexe"
+        }, 
+        title="Part des victimes par sexe",
+        color_discrete_sequence=px.colors.sequential.PuRd_r
+    )
+
+    # age-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('age').count()
+    fig9 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "age": "Classe d'âge"
+        },
+        title="Victimes selon la classe d'âge",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # trajet-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('trajet').count()
+    df_vicGroupBy.rename(
+        index={
+            -1: 'Non renseigné',
+            0: 'Non renseigné',
+            1: 'Domicile - travail', 
+            2: 'Domicile - école', 
+            3: 'Courses - achats',
+            4: 'Utilisation professionnel',
+            5: 'Promenade - loisirs',
+            9: 'Autre'
+        }, 
+        inplace=True
+    )
+    fig10 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "trajet": "Trajet"
+        },
+        title="Victimes selon le type de trajet",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # mois-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('mois').count()
+    df_vicGroupBy.rename(
+        index={
+            1: 'Jan', 2: 'Fév', 3: 'Mar', 4: 'Avr', 5: 'Mai', 6: 'Juin',
+            7: 'Juil', 8: 'Aoû', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Déc'
+        }, 
+        inplace=True
+    )
+    fig11 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "mois": "Mois"
+        },
+        title="Victimes selon le mois",
+        text='Num_Acc',
+        color_discrete_sequence=px.colors.sequential.RdBu_r
+    )
+
+    # map-graph ----------------------------------
+    df_vic['grav'].astype(int)
+    fig12 = px.scatter_map(
+        df_vic, 
+        lat='lat', 
+        lon='long', 
+        color='grav_2',
+        hover_name='com', 
+        hover_data=["lat", "long", "date", "hrmn", "catv", "catu", "grav_2", "sexe", "age"],
+        labels={"grav_2": "Gravité"},
+        height=800,
+        color_discrete_map={
+            "Tué": "black",
+            "Blessé hospitalisé": "red",
+            "Blessé léger": "yellow"
+        },
+        title="Cartographie des victimes selon la gravité",
+    )
+    fig12.update_layout(map_style="open-street-map")
+    fig12.update_traces(marker=dict(size=15))
+
+    return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12
 
 # =============================================================
 # MAIN APP
@@ -197,20 +529,35 @@ def lister_departement():
 st.set_page_config(page_title="AcciViz", layout="wide")
 
 st.title(":material/car_crash: AcciViz")
+st.sidebar.title("Filtres")
 
 with st.expander("À propos"):
     st.markdown(
-        '''
-        **AcciViz** est un tableau de bord permettant de visualier l'accidentalité d'un département pour une année sélectionnée.
+        f'''  
+        **AcciViz** est un tableau de bord permettant de visualier les données d'accidentalité pour un département et une année sélectionnés.
 
         ### Source des données
         
-        Les données accidents proviennent toutes du site Web [datagouv.fr](https://www.data.gouv.fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2024).
+        Les données accidents utilisées proviennent toutes du site Web [datagouv.fr](https://www.data.gouv.fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2024).
         Elles sont sous licence ouverte (Open licence).
+
+        Les bases de données, extraites du fichier BAAC, répertorient l'intégralité des accidents corporels de la circulation, intervenus durant une année précise en France métropolitaine, dans les départements d'Outre-mer (Guadeloupe, Guyane, Martinique, La Réunion et Mayotte depuis 2012) et dans les autres territoires d'Outre-mer (Saint-Pierre-et-Miquelon, Saint-Barthélemy, Saint-Martin, Wallis-et-Futuna, Polynésie française et Nouvelle-Calédonie ; disponible qu'à partir de 2019 dans l'open data) avec une description simplifiée.
+        Cela comprend des informations de localisation de l'accident, telles que renseignées ainsi que des informations concernant les caractéristiques de l'accident et son lieu, les véhicules impliqués et leurs victimes.
+
+        Le terme **victimes** regroupe les usagers tués et les usagers blessés (blessés hospitalisés + blessés légers).
         
-        Pour l'exploitation du jeu de données, il est vivement recommandé de télécharger la description des bases de données annuelles.
+        Les base de données de 2005 à 2024 (2025 n'est pas encore disponible en open data) sont désormais annuelles et composées de 4 fichiers au format CSV : Caractéristiques ; Lieux ; Véhicules ; Usagers. Ces 4 fichiers sont fusionnés par l'application **AcciViz** en un seul jeu de données **accidents**. Enfin, ce dernier est utilisé pour créer le tableau de bord.
         '''
     )
+
+    st.image("assets/workflow.png")
+
+    st.markdown(
+        '''        
+        Pour l'exploitation des données, il est vivement recommandé de télécharger la description des bases de données annuelles.
+        '''
+    )
+    
 
     with open("assets/description-des-bases-de-donnees-annuelles-1.pdf", "rb") as f:
         pdf_bytes = f.read()
@@ -229,9 +576,9 @@ with st.expander("À propos"):
                 
         Stéphane SADOWSKI  
         Chargé d'études en sécurité routière  
-        Cerema Est - Bâtiment C Île du Saulcy - 57000 Metz  
+        Cerema - DTerEst-DTMI-CSI - Bâtiment C Île du Saulcy - 57000 Metz  
         :material/contact_mail: [stephane.sadowski@cerema.fr](mailto:stephane.sadowski@cerema.fr)  
-        :material/phone: 07 64 42 87 61
+        :material/phone: 01 59 44 39 04 - 07 64 42 87 61
         '''
     )
 
@@ -243,14 +590,16 @@ with st.expander("À propos"):
 st.divider()
 
 year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020), index=0)
-dept = st.sidebar.selectbox("**Code Insee département :**", options=lister_departement(), index=57)
+dept = st.sidebar.selectbox("**Département :**", options=[nom_complet for _, _, nom_complet, _ in list_dept()], index=57)
+
+info_dept = get_info_dept(dept)
 
 df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager = load_data(year, dept)
-df_accident = preparer_df(df_accident)
+df_accident = prepare_data(df_accident)
 
 st.sidebar.success(f"{df_accident.shape[0]} lignes chargées.", icon=":material/check:")
 
-df_indicateur = calculer_indicateurs(df_accident)
+df_indicateur = calculate_indicators(df_accident)
 
 st.subheader(f"Accidentologie pour l'année {year} dans le département {dept}")
 
@@ -258,24 +607,33 @@ c1, c2, c3, c4 = st.columns(4)
 c1.metric(
     "Nombre d'accidents (A)", 
     value=df_indicateur["Num_Acc"].nunique(), 
-    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / 1051309)} en Mhab', 
+    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
     delta_arrow="off", 
-    delta_color="off", 
+    delta_color="blue", 
     border=True
 )
 c2.metric(
     "Nombre d'accidents mortels (AM)", 
     value=df_indicateur["AM"].sum(), 
+    delta=f'{int(df_indicateur["AM"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue",
     border=True
 )
 c3.metric(
     "Nombre d'accidents graves non mortel (AGNM)", 
-    value=df_indicateur["AGNM"].sum(), 
+    value=df_indicateur["AGNM"].sum(),
+    delta=f'{int(df_indicateur["AGNM"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue", 
     border=True
 )
 c4.metric(
     "Nombre d'accidents légers (AL)", 
-    value=df_indicateur["AL"].sum(), 
+    value=df_indicateur["AL"].sum(),
+    delta=f'{int(df_indicateur["AL"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue", 
     border=True
 )
 
@@ -283,150 +641,100 @@ c5, c6, c7, c8 = st.columns(4)
 c5.metric(
     "Nombre de victimes (V)", 
     value=df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(), 
+    delta=f'{int((df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue",
     border=True
 )
 c6.metric(
     "Nombre de tués (T)", 
-    value=df_indicateur["T"].astype(int).sum(), 
+    value=df_indicateur["T"].astype(int).sum(),
+    delta=f'{int(df_indicateur["T"].astype(int).sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue",
     border=True
 )
 c7.metric(
     "Nombre de blessés (B)", 
-    value=df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(), 
+    value=df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(),
+    delta=f'{int((df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
+    delta_arrow="off",
+    delta_color="blue", 
     border=True
 )
 c8.metric(
     "Nombre de blessés hospitalisés (H)", 
-    value=df_indicateur["BH"].astype(int).sum(), 
+    value=df_indicateur["BH"].astype(int).sum(),
+    delta=f'{int(df_indicateur["BH"].astype(int).sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    delta_arrow="off",
+    delta_color="blue", 
     border=True
 )
 
 # Conserver uniquement les victimes, écarter les "Indemnes".
 df_victimes = df_accident[(df_accident["grav"] == 2) | (df_accident["grav"] == 3) | (df_accident["grav"] == 4)].reset_index()
 
+fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12 = generate_graph(df_victimes)
+
 c1, c2, c3 = st.columns(3)
 
 with c1:
     # Part des victimes par localisation
     with st.container(border=True):
-        df_victimesByAgg2 = df_victimes.groupby('agg_2').count()
-        fig1 = px.pie(
-            df_victimesByAgg2, 
-            values="Num_Acc", 
-            names=df_victimesByAgg2.index,
-            labels={
-                "Num_Acc": "Victimes",
-                "agg_2": "Localisation"
-            }, 
-            title="Part des victimes par localisation",
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig1)
 
     # Part des victimes par catégorie de route
     with st.container(border=True):
-        df_victimesByCatr2 = df_victimes.groupby('catr_2').count()
-        fig4 = px.bar(
-            df_victimesByCatr2,
-            x=df_victimesByCatr2.index,
-            y='Num_Acc',
-            labels={
-                "Num_Acc": "Victimes",
-                "catr_2": "Cat. route"
-            },
-            title="Victimes par catégorie de route",
-            text='Num_Acc',
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig4)
 
     # Part des victimes par catégorie d'usager
     with st.container(border=True):
-        df_victimesByCatu = df_victimes.groupby('catu').count()
-        df_victimesByCatu.rename(index={1: 'Conducteur', 2: 'Passager', 3: 'Piéton'}, inplace=True)
-        fig7 = px.pie(
-            df_victimesByCatu, 
-            values="Num_Acc", 
-            names=df_victimesByCatu.index,
-            labels={
-                "Num_Acc": "Victimes",
-                "catu": "Cat. usager"
-            }, 
-            title="Part des victimes par catégorie d'usager",
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig7)
+
+    # Victimes par mode de déplacement
+    with st.container(border=True):
+        st.markdown("**Victimes par mode de déplacement**")
+        #st.plotly_chart(fig13)
 
 
 with c2:
     # Part des victimes par intersection
     with st.container(border=True):
-        df_victimesByInt2 = df_victimes.groupby('int_2').count()
-        fig2 = px.pie(
-            df_victimesByInt2, 
-            values="Num_Acc", 
-            names=df_victimesByInt2.index,
-            labels={
-                "Num_Acc": "Victimes",
-                "int_2": "Intersection"
-            }, 
-            title="Part des victimes par intersection",
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig2)
 
     # Victimes par conditions atmosphériques
     with st.container(border=True):
-        df_victimesByAtm2 = df_victimes.groupby('atm_2').count()
-        fig5 = px.bar(
-            df_victimesByAtm2,
-            x=df_victimesByAtm2.index,
-            y='Num_Acc',
-            labels={
-                "Num_Acc": "Victimes",
-                "atm_2": "Cond. atmosphériques"
-            },
-            title="Victimes par conditions atmosphériques",
-            text='Num_Acc',
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig5)
+
+    # Victimes par sexe
+    with st.container(border=True):
+        st.plotly_chart(fig8)
+
+    # Victimes par type de trajet
+    with st.container(border=True):
+        st.plotly_chart(fig10)
 
 
 with c3:
     # Part des victimes par luminosités
     with st.container(border=True):
-        df_victimesByLum2 = df_victimes.groupby('lum_2').count()
-        fig3 = px.pie(
-            df_victimesByLum2, 
-            values="Num_Acc", 
-            names=df_victimesByLum2.index,
-            labels={
-                "Num_Acc": "Victimes",
-                "lum_2": "Luminosité"
-            }, 
-            title="Part des victimes par luminosité",
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig3)
 
     # Victimes selon l'état de surface de la chaussée
     with st.container(border=True):
-        df_victimesBySurf2 = df_victimes.groupby('surf_2').count()
-        fig6 = px.bar(
-            df_victimesBySurf2,
-            x=df_victimesBySurf2.index,
-            y='Num_Acc',
-            labels={
-                "Num_Acc": "Victimes",
-                "surf_2": "Etat surface"
-            },
-            title="Victimes selon l'état de surface de la chaussée",
-            text='Num_Acc',
-            color_discrete_sequence=px.colors.sequential.RdBu_r
-        )
         st.plotly_chart(fig6)
 
+    # Victimes selon l'état de surface de la chaussée
+    with st.container(border=True):
+        st.plotly_chart(fig9)
+
+    # Victimes par sexe
+    with st.container(border=True):
+        st.plotly_chart(fig11)
+
+
+with st.container(border=True):
+    st.plotly_chart(fig12)
 
 with st.expander("Voir le jeu de données résultat"):
     st.dataframe(df_accident)
