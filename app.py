@@ -692,6 +692,7 @@ with c1:
     # Victimes par mode de déplacement
     with st.container(border=True):
         st.markdown("**Victimes par mode de déplacement**")
+        st.markdown(":material/build_circle: Bientôt disponible")
         #st.plotly_chart(fig13)
 
 
