@@ -774,6 +774,4 @@ with st.expander("Voir le jeu de données résultat"):
 # SECTION DE TEST - À SUPPRIMER
 # =============================================================
 
-st.text(df_usager["grav"].dtype)
-st.text(get_id_grav(grav))
 
