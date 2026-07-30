@@ -9,12 +9,13 @@ import plotly.express as px
 # =============================================================
 
 @st.cache_data
-def load_data(year=2024, dept='57 Moselle'):
+def load_data(year=2024, dept='57 Moselle', id_grav=0):
     """Charger les 4 fichiers suivants : caractéristiques, lieux, véhicules, usagers. Puis les fusionner dans un unique jeu de donnée 'df_accident'.
 
     Args:
         year (int, optionel): l'année issue du filtre 'Année'. Par défaut 2024.
         dept (str, optionel): le département issu du filtre 'Département'. Par défaut '57 Moselle'.
+        id_grav (int, optionel): l'identifiant BAAC de la gravité de blessure de l'usager. Par défaut = 0, c'est à dire toutes les gravité.
 
     Returns:
         Any: le jeu de données 'df_accident'.
@@ -26,6 +27,9 @@ def load_data(year=2024, dept='57 Moselle'):
 
     code_dept = dept.split(sep=" ")
     df_caracteristique = df_caracteristique[df_caracteristique["dep"] == code_dept[0]]
+
+    if id_grav != 0:
+        df_usager = df_usager[df_usager["grav"] == id_grav]
 
     df_lieu = df_lieu.sort_values(["Num_Acc", "catr"])
     df_lieu = df_lieu.drop_duplicates(subset="Num_Acc", keep="first")
@@ -312,6 +316,19 @@ def get_info_dept(nom_recherche):
             return (code, nom, nom_complet, pop)
     return None
 
+def get_id_grav(grav):
+    if grav == "Tué":
+        return 1
+
+    if grav == "Blessé hospitalisé":
+        return 2
+
+    if grav == "Blessé léger":
+        return 3
+
+    return 0
+
+
 def generate_graph(df_vic):
     # agg-graph ----------------------------------
     df_vic = df_vic.assign(agg_2 = 'Hors agglomération')
@@ -592,8 +609,10 @@ st.divider()
 
 year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020), index=0)
 dept = st.sidebar.selectbox("**Département :**", options=[nom_complet for _, _, nom_complet, _ in list_dept()], index=57)
+grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "Tué", "Blessé hospitalisé", "Blessé léger"], index=0)
 
 info_dept = get_info_dept(dept)
+id_grav = get_id_grav(grav)
 
 df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager = load_data(year, dept)
 df_accident = prepare_data(df_accident)
