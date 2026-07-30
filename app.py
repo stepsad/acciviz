@@ -317,13 +317,13 @@ def get_info_dept(nom_recherche):
     return None
 
 def get_id_grav(grav):
-    if grav == "Tué":
+    if grav == "Tués":
         return 2
 
-    if grav == "Blessé hospitalisé":
+    if grav == "Blessés hospitalisés":
         return 3
 
-    if grav == "Blessé léger":
+    if grav == "Blessés légers":
         return 4
 
     return 0
@@ -582,7 +582,8 @@ with st.expander("À propos"):
         data=pdf_bytes,
         file_name="description-bdd-annuelles.pdf",
         mime="application/pdf",
-        icon=":material/download:"
+        icon=":material/download:",
+        type="primary"
     )
 
     st.markdown(
@@ -609,7 +610,7 @@ st.divider()
 
 year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020), index=0)
 dept = st.sidebar.selectbox("**Département :**", options=[nom_complet for _, _, nom_complet, _ in list_dept()], index=57)
-grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "Tué", "Blessé hospitalisé", "Blessé léger"], index=0)
+grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "Tués", "Blessés hospitalisés", "Blessés légers"], index=0)
 
 info_dept = get_info_dept(dept)
 id_grav = get_id_grav(grav)
@@ -621,7 +622,8 @@ st.sidebar.success(f"{df_accident.shape[0]} lignes chargées.", icon=":material/
 
 df_indicateur = calculate_indicators(df_accident)
 
-st.subheader(f"Accidentalité pour l'année {year} dans le département {dept}")
+type_victime = f"Accidentalité des {grav.lower()} " if id_grav != 0 else "Accidentalité "
+st.subheader(f"{type_victime}pour l'année {year} dans le département {dept}")
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric(
