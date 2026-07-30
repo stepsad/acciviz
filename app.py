@@ -602,7 +602,7 @@ st.sidebar.success(f"{df_accident.shape[0]} lignes chargées.", icon=":material/
 
 df_indicateur = calculate_indicators(df_accident)
 
-st.subheader(f"Accidentologie pour l'année {year} dans le département {dept}")
+st.subheader(f"Accidentalité pour l'année {year} dans le département {dept}")
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric(
