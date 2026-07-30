@@ -528,7 +528,7 @@ def generate_graph(df_vic):
         color_discrete_map={
             "Tué": "black",
             "Blessé hospitalisé": "red",
-            "Blessé léger": "yellow"
+            "Blessé léger": "orange"
         },
         title="Cartographie des victimes selon la gravité",
     )
