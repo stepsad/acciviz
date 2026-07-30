@@ -318,13 +318,13 @@ def get_info_dept(nom_recherche):
 
 def get_id_grav(grav):
     if grav == "Tué":
-        return 1
-
-    if grav == "Blessé hospitalisé":
         return 2
 
-    if grav == "Blessé léger":
+    if grav == "Blessé hospitalisé":
         return 3
+
+    if grav == "Blessé léger":
+        return 4
 
     return 0
 
@@ -614,7 +614,7 @@ grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "
 info_dept = get_info_dept(dept)
 id_grav = get_id_grav(grav)
 
-df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager = load_data(year, dept)
+df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager = load_data(year, dept, id_grav)
 df_accident = prepare_data(df_accident)
 
 st.sidebar.success(f"{df_accident.shape[0]} lignes chargées.", icon=":material/check:")
@@ -774,5 +774,6 @@ with st.expander("Voir le jeu de données résultat"):
 # SECTION DE TEST - À SUPPRIMER
 # =============================================================
 
-
+st.text(df_usager["grav"].dtype)
+st.text(get_id_grav(grav))
 
