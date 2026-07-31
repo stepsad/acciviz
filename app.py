@@ -2,9 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import locale
-
-#locale.setlocale(locale.LC_ALL, "fr-FR.UTF-8")
 
 # =============================================================
 # FONCTIONS
@@ -679,32 +676,32 @@ st.subheader(f"{type_victime}pour l'année {year} dans le département {dept}")
 c1, c2, c3, c4 = st.columns(4)
 c1.metric(
     "Nombre d'accidents (A)", 
-    value=f'{df_indicateur["Num_Acc"].nunique():n}', 
-    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
+    value=f'{df_indicateur["Num_Acc"].nunique():,}'.replace(",", " "), 
+    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab', 
     delta_arrow="off", 
     delta_color="blue", 
     border=True
 )
 c2.metric(
     "Nombre d'accidents mortels (AM)", 
-    value=f'{df_indicateur["AM"].sum():n}', 
-    delta=f'{int(df_indicateur["AM"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AM"].sum():,}'.replace(",", " "), 
+    delta=f'{int(df_indicateur["AM"].sum() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c3.metric(
     "Nombre d'accidents graves non mortel (AGNM)", 
-    value=f'{df_indicateur["AGNM"].sum():n}',
-    delta=f'{int(df_indicateur["AGNM"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AGNM"].sum():,}'.replace(",", " "),
+    delta=f'{int(df_indicateur["AGNM"].sum() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
 )
 c4.metric(
     "Nombre d'accidents légers (AL)", 
-    value=f'{df_indicateur["AL"].sum():n}',
-    delta=f'{int(df_indicateur["AL"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AL"].sum():,}'.replace(",", " "),
+    delta=f'{int(df_indicateur["AL"].sum() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
@@ -713,32 +710,32 @@ c4.metric(
 c5, c6, c7, c8 = st.columns(4)
 c5.metric(
     "Nombre de victimes (V)", 
-    value=f'{df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():n}', 
-    delta=f'{int((df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():,}'.replace(",", " "), 
+    delta=f'{int((df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c6.metric(
     "Nombre de tués (T)", 
-    value=f'{df_indicateur["T"].astype(int).sum():n}',
-    delta=f'{int(df_indicateur["T"].astype(int).sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["T"].astype(int).sum():,}'.replace(",", " "),
+    delta=f'{int(df_indicateur["T"].astype(int).sum() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c7.metric(
     "Nombre de blessés (B)", 
-    value=f'{df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():n}',
-    delta=f'{int((df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
+    value=f'{df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():,}'.replace(",", " "),
+    delta=f'{int((df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab', 
     delta_arrow="off",
     delta_color="blue", 
     border=True
 )
 c8.metric(
     "Nombre de blessés hospitalisés (H)", 
-    value=f'{df_indicateur["BH"].astype(int).sum():n}',
-    delta=f'{int(df_indicateur["BH"].astype(int).sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["BH"].astype(int).sum():,}'.replace(",", " "),
+    delta=f'{int(df_indicateur["BH"].astype(int).sum() * 1e6 / info_dept[3]):,} en Mhab'.replace(",", " ") if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
