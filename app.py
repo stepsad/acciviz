@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import locale
 
-locale.setlocale(locale.LC_ALL, "fr-FR.UTF-8")
+#locale.setlocale(locale.LC_ALL, "fr-FR.UTF-8")
 
 # =============================================================
 # FONCTIONS
