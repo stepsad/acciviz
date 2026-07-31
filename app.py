@@ -330,6 +330,8 @@ def get_id_grav(grav):
 
 
 def generate_graph(df_vic):
+    COLOR = px.colors.sequential.Redor
+
     # agg-graph ----------------------------------
     df_vic = df_vic.assign(agg_2 = 'Hors agglomération')
     df_vic.loc[df_vic['agg'] == 2, 'agg_2'] = 'En agglomération'
@@ -343,8 +345,9 @@ def generate_graph(df_vic):
             "agg_2": "Localisation"
         }, 
         title="Part des victimes par localisation",
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
+    fig1.update_traces(pull=0.01)
 
     # int-graph ----------------------------------
     df_vicGroupBy = df_vic.groupby('int_2').count()
@@ -357,8 +360,9 @@ def generate_graph(df_vic):
             "int_2": "Intersection"
         }, 
         title="Part des victimes par intersection",
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
+    fig2.update_traces(pull=0.01)
 
     # lum-graph -----------------------------
     df_vicGroupBy = df_vic.groupby('lum_2').count()
@@ -371,8 +375,9 @@ def generate_graph(df_vic):
             "lum_2": "Luminosité"
         }, 
         title="Part des victimes par luminosité",
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
+    fig3.update_traces(pull=0.01)
 
     # catr-graph ----------------------------------
     df_vicGroupBy = df_vic.groupby('catr_2').count()
@@ -386,7 +391,7 @@ def generate_graph(df_vic):
         },
         title="Victimes par catégorie de route",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
 
     # atm-graph ----------------------------------
@@ -401,7 +406,7 @@ def generate_graph(df_vic):
         },
         title="Victimes par conditions atmosphériques",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
 
     # surf-graph ----------------------------------
@@ -416,7 +421,7 @@ def generate_graph(df_vic):
         },
         title="Victimes selon l'état de surface de la chaussée",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
 
     # catu-graph ----------------------------------
@@ -431,8 +436,9 @@ def generate_graph(df_vic):
             "catu": "Cat. usager"
         }, 
         title="Part des victimes par catégorie d'usager",
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
+    fig7.update_traces(pull=0.01)
 
     # sexe-graph ----------------------------------
     df_vicGroupBy = df_vic.groupby('sexe').count()
@@ -446,8 +452,9 @@ def generate_graph(df_vic):
             "sexe": "Sexe"
         }, 
         title="Part des victimes par sexe",
-        color_discrete_sequence=px.colors.sequential.PuRd_r
+        color_discrete_sequence=COLOR
     )
+    fig8.update_traces(pull=0.01)
 
     # age-graph ----------------------------------
     df_vicGroupBy = df_vic.groupby('age').count()
@@ -461,7 +468,7 @@ def generate_graph(df_vic):
         },
         title="Victimes selon la classe d'âge",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
 
     # trajet-graph ----------------------------------
@@ -489,7 +496,7 @@ def generate_graph(df_vic):
         },
         title="Victimes selon le type de trajet",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
 
     # mois-graph ----------------------------------
@@ -511,12 +518,15 @@ def generate_graph(df_vic):
         },
         title="Victimes selon le mois",
         text='Num_Acc',
-        color_discrete_sequence=px.colors.sequential.RdBu_r
+        color_discrete_sequence=COLOR
     )
+
+    # catv-graph ----------------------------------
+
 
     # map-graph ----------------------------------
     df_vic['grav'].astype(int)
-    fig12 = px.scatter_map(
+    fig13 = px.scatter_map(
         df_vic, 
         lat='lat', 
         lon='long', 
@@ -532,10 +542,10 @@ def generate_graph(df_vic):
         },
         title="Cartographie des victimes selon la gravité",
     )
-    fig12.update_layout(map_style="open-street-map")
-    fig12.update_traces(marker=dict(size=15))
+    fig13.update_layout(map_style="open-street-map")
+    fig13.update_traces(marker=dict(size=15))
 
-    return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12
+    return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig13
 
 # =============================================================
 # MAIN APP
@@ -696,7 +706,7 @@ c8.metric(
 # Conserver uniquement les victimes, écarter les "Indemnes".
 df_victimes = df_accident[(df_accident["grav"] == 2) | (df_accident["grav"] == 3) | (df_accident["grav"] == 4)].reset_index()
 
-fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12 = generate_graph(df_victimes)
+fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig13 = generate_graph(df_victimes)
 
 c1, c2, c3 = st.columns(3)
 
@@ -757,7 +767,7 @@ with c3:
 
 
 with st.container(border=True):
-    st.plotly_chart(fig12)
+    st.plotly_chart(fig13)
 
 with st.expander("Voir le jeu de données résultat"):
     st.dataframe(df_accident)
