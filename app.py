@@ -2,7 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import locale
 
+locale.setlocale(locale.LC_ALL, "fr-FR.UTF-8")
 
 # =============================================================
 # FONCTIONS
@@ -56,8 +58,11 @@ def prepare_data(df_accident):
 
     # Ajouter une colonne 'date'
     df_accident = df_accident.assign(date = 'NA')
-    df_accident['date'] = df_accident['an'].map(str) + "-" + df_accident['mois'].map(str) + "-" + df_accident['jour'].map(str)
-    df_accident['date'] = pd.to_datetime(df_accident['date'])
+    df_accident['datetime'] = df_accident['an'].map(str) + "-" + df_accident['mois'].map(str) + "-" + df_accident['jour'].map(str)
+    df_accident['datetime'] = pd.to_datetime(df_accident['datetime'] + " " + df_accident['hrmn'])
+
+    # Ajouter une colonne 'heure'
+    df_accident['heure'] = df_accident['datetime'].dt.hour
 
     # Ajouter une colonne 'agg_2'
     df_accident = df_accident.assign(agg_2 = 'Hors agglomération')
@@ -108,20 +113,29 @@ def prepare_data(df_accident):
     df_accident.loc[df_accident.surf == 8, 'surf_2'] = 'Dégradé'
     df_accident.loc[df_accident.surf == 9, 'surf_2'] = 'Autre'
 
+    # Ajouter une colonne 'catv_2'
+    df_accident = df_accident.assign(catv_2 = 'VT')
+    df_accident.loc[df_accident["catv"].isin([0, 3, 20, 21, 35, 36, 37, 38, 39, 40, 99]), 'catv_2'] = 'Autres'
+    df_accident.loc[df_accident["catv"] == 50, 'catv_2'] = 'EDP-m'
+    df_accident.loc[df_accident["catv"].isin([1, 60, 80]), 'catv_2'] = 'Vélo'
+    df_accident.loc[df_accident["catv"].isin([2, 30, 31, 32, 33, 34, 41, 42, 43]), 'catv_2'] = '2RM'
+    df_accident.loc[df_accident["catv"] == 10, 'catv_2'] = 'VU'
+    df_accident.loc[df_accident["catv"].isin([13, 14, 15, 16, 17]), 'catv_2'] = 'PL'
+
     # Ajouter une colonne 'grav_2'
     df_accident = df_accident.assign(grav_2 = 'Indemne')
     df_accident.loc[df_accident.grav == 2, 'grav_2'] = 'Tué'
     df_accident.loc[df_accident.grav == 3, 'grav_2'] = 'Blessé hospitalisé'
     df_accident.loc[df_accident.grav == 4, 'grav_2'] = 'Blessé léger'
 
-    # Ajouter une colonne 'age'
-    df_accident = df_accident.assign(age = '0-17')
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 17, 'age'] = '18-24'
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 24, 'age'] = '25-34'
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 34, 'age'] = '35-44'
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 44, 'age'] = '45-54'
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 54, 'age'] = '55-64'
-    df_accident.loc[(df_accident.an - df_accident.an_nais) > 64, 'age'] = '65+'
+    # Ajouter une colonne 'classe_age'
+    df_accident = df_accident.assign(classe_age = '0-17')
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 17, 'classe_age'] = '18-24'
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 24, 'classe_age'] = '25-34'
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 34, 'classe_age'] = '35-44'
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 44, 'classe_age'] = '45-54'
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 54, 'classe_age'] = '55-64'
+    df_accident.loc[(df_accident.an - df_accident.an_nais) > 64, 'classe_age'] = '65+'
 
     # Ajouter une colonne 'lum_2'
     df_accident = df_accident.assign(lum_2 = 'Jour')
@@ -456,15 +470,15 @@ def generate_graph(df_vic):
     )
     fig8.update_traces(pull=0.01)
 
-    # age-graph ----------------------------------
-    df_vicGroupBy = df_vic.groupby('age').count()
+    # classe_age-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('classe_age').count()
     fig9 = px.bar(
         df_vicGroupBy,
         x=df_vicGroupBy.index,
         y='Num_Acc',
         labels={
             "Num_Acc": "Victimes",
-            "age": "Classe d'âge"
+            "classe_age": "Classe d'âge"
         },
         title="Victimes selon la classe d'âge",
         text='Num_Acc',
@@ -522,17 +536,44 @@ def generate_graph(df_vic):
     )
 
     # catv-graph ----------------------------------
+    df_vicGroupBy = df_vic.groupby('catv_2').count()
+    fig12 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "catv_2": "Catégorie du véhicule"
+        },
+        title="Victimes selon la catégorie du véhicule",
+        text='Num_Acc',
+        color_discrete_sequence=COLOR
+    )
 
+    # heure-graph --------------------------------
+    df_vicGroupBy = df_vic.groupby('heure').count()
+    fig13 = px.bar(
+        df_vicGroupBy,
+        x=df_vicGroupBy.index,
+        y='Num_Acc',
+        labels={
+            "Num_Acc": "Victimes",
+            "heure": "Heure"
+        },
+        title="Victimes selon l'heure",
+        text='Num_Acc',
+        color_discrete_sequence=COLOR
+    )
 
     # map-graph ----------------------------------
     df_vic['grav'].astype(int)
-    fig13 = px.scatter_map(
+    fig14 = px.scatter_map(
         df_vic, 
         lat='lat', 
         lon='long', 
         color='grav_2',
         hover_name='com', 
-        hover_data=["lat", "long", "date", "hrmn", "catv", "catu", "grav_2", "sexe", "age"],
+        hover_data=["lat", "long", "date", "hrmn", "catv", "catu", "grav_2", "sexe", "classe_age"],
         labels={"grav_2": "Gravité"},
         height=800,
         color_discrete_map={
@@ -542,10 +583,10 @@ def generate_graph(df_vic):
         },
         title="Cartographie des victimes selon la gravité",
     )
-    fig13.update_layout(map_style="open-street-map")
-    fig13.update_traces(marker=dict(size=15))
+    fig14.update_layout(map_style="open-street-map")
+    fig14.update_traces(marker=dict(size=15))
 
-    return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig13
+    return fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14
 
 # =============================================================
 # MAIN APP
@@ -638,32 +679,32 @@ st.subheader(f"{type_victime}pour l'année {year} dans le département {dept}")
 c1, c2, c3, c4 = st.columns(4)
 c1.metric(
     "Nombre d'accidents (A)", 
-    value=df_indicateur["Num_Acc"].nunique(), 
-    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
+    value=f'{df_indicateur["Num_Acc"].nunique():n}', 
+    delta=f'{int(df_indicateur["Num_Acc"].nunique() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
     delta_arrow="off", 
     delta_color="blue", 
     border=True
 )
 c2.metric(
     "Nombre d'accidents mortels (AM)", 
-    value=df_indicateur["AM"].sum(), 
-    delta=f'{int(df_indicateur["AM"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AM"].sum():n}', 
+    delta=f'{int(df_indicateur["AM"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c3.metric(
     "Nombre d'accidents graves non mortel (AGNM)", 
-    value=df_indicateur["AGNM"].sum(),
-    delta=f'{int(df_indicateur["AGNM"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AGNM"].sum():n}',
+    delta=f'{int(df_indicateur["AGNM"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
 )
 c4.metric(
     "Nombre d'accidents légers (AL)", 
-    value=df_indicateur["AL"].sum(),
-    delta=f'{int(df_indicateur["AL"].sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["AL"].sum():n}',
+    delta=f'{int(df_indicateur["AL"].sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
@@ -672,32 +713,32 @@ c4.metric(
 c5, c6, c7, c8 = st.columns(4)
 c5.metric(
     "Nombre de victimes (V)", 
-    value=df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(), 
-    delta=f'{int((df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():n}', 
+    delta=f'{int((df_indicateur["T"].astype(int).sum() + df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c6.metric(
     "Nombre de tués (T)", 
-    value=df_indicateur["T"].astype(int).sum(),
-    delta=f'{int(df_indicateur["T"].astype(int).sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["T"].astype(int).sum():n}',
+    delta=f'{int(df_indicateur["T"].astype(int).sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue",
     border=True
 )
 c7.metric(
     "Nombre de blessés (B)", 
-    value=df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum(),
-    delta=f'{int((df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
+    value=f'{df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum():n}',
+    delta=f'{int((df_indicateur["BH"].astype(int).sum() + df_indicateur["BL"].astype(int).sum()) * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab', 
     delta_arrow="off",
     delta_color="blue", 
     border=True
 )
 c8.metric(
     "Nombre de blessés hospitalisés (H)", 
-    value=df_indicateur["BH"].astype(int).sum(),
-    delta=f'{int(df_indicateur["BH"].astype(int).sum() * 1e6 / info_dept[3])} en Mhab' if info_dept[3] is not None else '-- en Mhab',
+    value=f'{df_indicateur["BH"].astype(int).sum():n}',
+    delta=f'{int(df_indicateur["BH"].astype(int).sum() * 1e6 / info_dept[3]):n} en Mhab' if info_dept[3] is not None else '-- en Mhab',
     delta_arrow="off",
     delta_color="blue", 
     border=True
@@ -706,31 +747,28 @@ c8.metric(
 # Conserver uniquement les victimes, écarter les "Indemnes".
 df_victimes = df_accident[(df_accident["grav"] == 2) | (df_accident["grav"] == 3) | (df_accident["grav"] == 4)].reset_index()
 
-fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig13 = generate_graph(df_victimes)
+fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14 = generate_graph(df_victimes)
 
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    # Part des victimes par localisation
-    with st.container(border=True):
-        st.plotly_chart(fig1)
-
-    # Part des victimes par catégorie de route
-    with st.container(border=True):
-        st.plotly_chart(fig4)
-
     # Part des victimes par catégorie d'usager
     with st.container(border=True):
         st.plotly_chart(fig7)
 
-    # Victimes par mode de déplacement
+    # Part des victimes par localisation
     with st.container(border=True):
-        st.markdown("**Victimes par mode de déplacement**")
-        st.markdown(":material/build_circle: Bientôt disponible")
-        #st.plotly_chart(fig13)
+        st.plotly_chart(fig1)
 
+    # Part des victimes par luminosités
+    with st.container(border=True):
+        st.plotly_chart(fig3)
 
 with c2:
+    # Victimes par sexe
+    with st.container(border=True):
+        st.plotly_chart(fig8)
+    
     # Part des victimes par intersection
     with st.container(border=True):
         st.plotly_chart(fig2)
@@ -739,35 +777,43 @@ with c2:
     with st.container(border=True):
         st.plotly_chart(fig5)
 
-    # Victimes par sexe
-    with st.container(border=True):
-        st.plotly_chart(fig8)
-
-    # Victimes par type de trajet
-    with st.container(border=True):
-        st.plotly_chart(fig10)
-
-
 with c3:
-    # Part des victimes par luminosités
+    # Victimes selon la classe d'âges
     with st.container(border=True):
-        st.plotly_chart(fig3)
+        st.plotly_chart(fig9)
+
+    # Part des victimes par catégorie de route
+    with st.container(border=True):
+        st.plotly_chart(fig4)
 
     # Victimes selon l'état de surface de la chaussée
     with st.container(border=True):
         st.plotly_chart(fig6)
 
-    # Victimes selon l'état de surface de la chaussée
-    with st.container(border=True):
-        st.plotly_chart(fig9)
+c4, c5 = st.columns(2)
 
-    # Victimes par sexe
+with c4:
+    # Victimes par mode de déplacement
+    with st.container(border=True):
+        st.plotly_chart(fig12)
+
+    # Victimes selon le mois
     with st.container(border=True):
         st.plotly_chart(fig11)
 
+with c5:
+    # Victimes par type de trajet
+    with st.container(border=True):
+        st.plotly_chart(fig10)
+
+    # Victimes selon l'heure
+    with st.container(border=True):
+        st.plotly_chart(fig13)
+
+
 
 with st.container(border=True):
-    st.plotly_chart(fig13)
+    st.plotly_chart(fig14)
 
 with st.expander("Voir le jeu de données résultat"):
     st.dataframe(df_accident)
