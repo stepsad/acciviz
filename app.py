@@ -35,7 +35,7 @@ def load_data(year=2024, dept='57 Moselle', id_grav=0):
 
     df_accident = pd.merge(df_caracteristique, df_lieu, how="left", on="Num_Acc")
     df_accident = pd.merge(df_accident, df_vehicule, how="left", on="Num_Acc")
-    df_accident = pd.merge(df_accident, df_usager, how="left", on=["Num_Acc", "id_vehicule"])   
+    df_accident = pd.merge(df_accident, df_usager, how="left", on=["Num_Acc", "num_veh"])   
 
     return df_accident, df_caracteristique, df_lieu, df_vehicule, df_usager
 
@@ -656,7 +656,7 @@ with st.expander("À propos"):
 
 st.divider()
 
-year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020), index=0)
+year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020, 2019, 2018), index=0)
 dept = st.sidebar.selectbox("**Département :**", options=[nom_complet for _, _, nom_complet, _ in list_dept()], index=57)
 grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "Tués", "Blessés hospitalisés", "Blessés légers"], index=0)
 
