@@ -8,7 +8,7 @@ import plotly.express as px
 # =============================================================
 
 @st.cache_data
-def load_data(year=2024, dept='57 Moselle', id_grav=0):
+def load_data(year=2025, dept='57 Moselle', id_grav=0):
     """Charger les 4 fichiers suivants : caractéristiques, lieux, véhicules, usagers. Puis les fusionner dans un unique jeu de donnée 'df_accident'.
 
     Args:
@@ -609,7 +609,7 @@ with st.expander("À propos"):
 
         Le terme **victimes** regroupe les usagers tués et les usagers blessés (blessés hospitalisés + blessés légers).
         
-        Les base de données de 2005 à 2024 (2025 n'est pas encore disponible en open data) sont désormais annuelles et composées de 4 fichiers au format CSV : Caractéristiques ; Lieux ; Véhicules ; Usagers. Ces 4 fichiers sont fusionnés par l'application **AcciViz** en un seul jeu de données **accidents**. Enfin, ce dernier est utilisé pour créer le tableau de bord.
+        Les base de données de 2005 à 2025 (ce tableau de bord démarre à partir de 2019) sont désormais annuelles et composées de 4 fichiers au format CSV : Caractéristiques ; Lieux ; Véhicules ; Usagers. Ces 4 fichiers sont fusionnés par l'application **AcciViz** en un seul jeu de données **accidents**. Enfin, ce dernier est utilisé pour créer le tableau de bord.
         '''
     )
 
@@ -656,7 +656,7 @@ with st.expander("À propos"):
 
 st.divider()
 
-year = st.sidebar.selectbox("**Année :**", options=(2024, 2023, 2022, 2021, 2020, 2019), index=0)
+year = st.sidebar.selectbox("**Année :**", options=(2025, 2024, 2023, 2022, 2021, 2020, 2019), index=0)
 dept = st.sidebar.selectbox("**Département :**", options=[nom_complet for _, _, nom_complet, _ in list_dept()], index=57)
 grav = st.sidebar.selectbox("**Gravité :**", options=["Toutes les gravités", "Tués", "Blessés hospitalisés", "Blessés légers"], index=0)
 
