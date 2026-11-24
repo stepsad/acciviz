@@ -53,11 +53,14 @@ def prepare_data(df_accident):
     df_accident['long'] = df_accident['long'].str.replace(',', '.')
     df_accident[['lat', 'long']] = df_accident[['lat', 'long']].apply(pd.to_numeric)
 
-    # Ajouter une colonne 'date'
+    # Ajouter une colonne 'datetime'
     df_accident = df_accident.assign(date = 'NA')
     df_accident['datetime'] = df_accident['an'].map(str) + "-" + df_accident['mois'].map(str) + "-" + df_accident['jour'].map(str)
     df_accident['datetime'] = pd.to_datetime(df_accident['datetime'] + " " + df_accident['hrmn'])
 
+    # Ajouter une colonne 'heure'
+    df_accident['date'] = df_accident['datetime'].dt.date
+    
     # Ajouter une colonne 'heure'
     df_accident['heure'] = df_accident['datetime'].dt.hour
 
@@ -570,8 +573,14 @@ def generate_graph(df_vic):
         lon='long', 
         color='grav_2',
         hover_name='com', 
-        hover_data=["lat", "long", "date", "hrmn", "catv", "catu", "grav_2", "sexe", "classe_age"],
-        labels={"grav_2": "Gravité"},
+        hover_data=["lat", "long", "date", "hrmn", "classe_age", "sexe", "catv", "catu", "grav_2"],
+        labels={
+            "date": "Date",
+            "hrmn": "Heure",
+            "grav_2": "Gravité",
+            "sexe": "Sexe",
+            "classe_age": "Classe d'ages"
+        },
         height=800,
         color_discrete_map={
             "Tué": "black",
