@@ -399,6 +399,7 @@ def generate_graph(df_vic):
         df_vicGroupBy,
         x=df_vicGroupBy.index,
         y='Num_Acc',
+        category_orders={"catr_2": ["A", "RN", "RD", "RM", "VC", "Autre"]},
         labels={
             "Num_Acc": "Victimes",
             "catr_2": "Cat. route"
@@ -414,6 +415,7 @@ def generate_graph(df_vic):
         df_vicGroupBy,
         x=df_vicGroupBy.index,
         y='Num_Acc',
+        category_orders={"atm_2": ["Normale", "Dégradée", "Autre"]},
         labels={
             "Num_Acc": "Victimes",
             "atm_2": "Cond. atmosphériques"
@@ -429,6 +431,7 @@ def generate_graph(df_vic):
         df_vicGroupBy,
         x=df_vicGroupBy.index,
         y='Num_Acc',
+        category_orders={"surf_2": ["Normale", "Dégradé", "Autre"]},
         labels={
             "Num_Acc": "Victimes",
             "surf_2": "Etat surface"
@@ -541,6 +544,7 @@ def generate_graph(df_vic):
         df_vicGroupBy,
         x=df_vicGroupBy.index,
         y='Num_Acc',
+        category_orders={"catv_2": ["EDP-m", "Vélo", "2RM", "VT", "VU", "PL", "Autres"]},
         labels={
             "Num_Acc": "Victimes",
             "catv_2": "Catégorie du véhicule"
